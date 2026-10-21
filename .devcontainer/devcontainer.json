@@ -1,0 +1,27 @@
+{
+  "name": "Traduzir Livro — ambiente com OCR",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspaces/traduzir-livro",
+  "remoteUser": "appuser",
+  "overrideCommand": true,
+  "postStartCommand": "nohup python /app/app.py > /tmp/traduzir-livro.log 2>&1 &",
+  "forwardPorts": [
+    7860
+  ],
+  "portsAttributes": {
+    "7860": {
+      "label": "Traduzir Livro • Abrir interface",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python"
+      ]
+    }
+  }
+}
