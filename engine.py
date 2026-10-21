@@ -334,45 +334,53 @@ def process_pdf(
         if progress:
             progress(n, n, "Montando e verificando o PDF")
 
-    output = fitz.open(input_path)
-    counts, warnings = [0] * n, []
-    font = _get_font()
-    try:
-        for i in reversed(range(n)):
-            texts, kind = extracted[i]
-            safe_to_replace = (layout == "substituir" and kind == "native"
+    # Ordem sequencial evita realocar páginas repetidamente em livros extensos.
+    with fitz.open(input_path) as original:
+        output = fitz.open()
+        counts, warnings = [0] * n, []
+        font = _get_font()
+        try:
+            for i in range(n):
+                texts, kind = extracted[i]
+                output.insert_pdf(original, from_page=i, to_page=i)
+                original_pos = len(output) - 1
+                can_replace = (layout == "substituir" and kind == "native"
                                and bool(font) and bool(texts))
-            if safe_to_replace:
-                testdoc = fitz.open()
-                testdoc.insert_pdf(output, from_page=i, to_page=i)
-                success = _fit_native(testdoc[0], texts, font)
-                if success and image_fingerprints(testdoc)[0] == image_hashes[i]:
-                    output.delete_page(i)
-                    output.insert_pdf(testdoc, start_at=i)
-                    testdoc.close()
-                    continue
-                testdoc.close()
-                warnings.append(f"Página {i+1}: tradução em folha adicional para preservar o desenho.")
-            note = fitz.open(
-                stream=_companion_pdf(texts, i+1, (output[i].rect.width, output[i].rect.height)),
-                filetype="pdf"
-            )
-            counts[i] = len(note)
-            output.insert_pdf(note, start_at=i + 1)
-            note.close()
+                replaced = False
+                if can_replace:
+                    replaced = _fit_native(output[original_pos], texts, font)
+                    if replaced:
+                        test_hash = tuple(sorted(
+                            hashlib.sha256(output.xref_stream_raw(info[0])).hexdigest()
+                            for info in output[original_pos].get_images(full=True)
+                        ))
+                        replaced = test_hash == image_hashes[i]
+                    if not replaced:
+                        output.delete_page(original_pos)
+                        output.insert_pdf(original, from_page=i, to_page=i)
+                        original_pos = len(output) - 1
+                        warnings.append(
+                            f"Página {i+1}: tradução em folha adicional para preservar o desenho."
+                        )
+                if not replaced:
+                    extra = fitz.open(
+                        stream=_companion_pdf(
+                            texts, i+1, (original[i].rect.width, original[i].rect.height)
+                        ),
+                        filetype="pdf"
+                    )
+                    counts[i] = len(extra)
+                    output.insert_pdf(extra)
+                    extra.close()
+                actual = tuple(sorted(
+                    hashlib.sha256(output.xref_stream_raw(info[0])).hexdigest()
+                    for info in output[original_pos].get_images(full=True)
+                ))
+                if actual != image_hashes[i]:
+                    raise RuntimeError(f"Falha na verificação das imagens da página {i+1}.")
 
-        index = 0
-        for i in range(n):
-            hash_now = tuple(sorted(
-                hashlib.sha256(output.xref_stream_raw(info[0])).hexdigest()
-                for info in output[index].get_images(full=True)
-            ))
-            if hash_now != image_hashes[i]:
-                raise RuntimeError(f"Falha na verificação das imagens da página {i+1}.")
-            index += 1 + counts[i]
-
-        # A compressão automática modificaria os bytes codificados de imagens!
-        output.save(output_path, garbage=0, deflate=False)
-        return Result(output_path, n, len(output), pages_ocr, sum(counts), True, warnings)
-    finally:
-        output.close()
+            # Recompressão mudaria os bytes codificados de imagens, por isso desligamos.
+            output.save(output_path, garbage=0, deflate=False)
+            return Result(output_path, n, len(output), pages_ocr, sum(counts), True, warnings)
+        finally:
+            output.close()
