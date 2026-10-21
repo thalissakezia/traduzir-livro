@@ -53,10 +53,7 @@ def run(pdf_file, source, layout, ocr, backend, ollama_model, progress=gr.Progre
     except Exception as exc:
         return None, f"❌ **Erro:** {type(exc).__name__}: {exc}"
 
-with gr.Blocks(
-    title="Traduzir Livro • Ilustrações intactas", css=CSS,
-    theme=gr.themes.Soft(primary_hue="indigo", neutral_hue="slate")
-) as demo:
+with gr.Blocks(title="Traduzir Livro • Ilustrações intactas") as demo:
     gr.HTML("""<div class="hero">
       <h1>📚 Traduzir Livro</h1>
       <p>Seu livro em português. Ilustrações preservadas.</p></div>""")
@@ -105,6 +102,8 @@ with gr.Blocks(
 demo.queue(default_concurrency_limit=1, max_size=8)
 if __name__ == "__main__":
     demo.launch(
+        css=CSS,
+        theme=gr.themes.Soft(primary_hue="indigo", neutral_hue="slate"),
         server_name="0.0.0.0",
         server_port=int(os.getenv("PORT", "7860")),
         max_file_size="160mb",
