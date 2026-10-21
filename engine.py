@@ -280,7 +280,7 @@ def _fit_native(page, paragraphs, font_path):
                          min(16, p.fontsize * .8), min(14, p.fontsize * .7), 6.2]:
                 shape = page.new_shape()
                 if shape.insert_textbox(
-                    r, p.translated, fontname="ImageSafe", fontsize=max(6.2, size),
+                    r, p.translated, fontname="ImageSafe", fontfile=font_path, fontsize=max(6.2, size),
                     lineheight=1.0
                 ) >= 0:
                     shape.commit(overlay=True)
