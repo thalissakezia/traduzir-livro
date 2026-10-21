@@ -67,3 +67,29 @@ def test_five_pages_have_matching_translations(tmp_path):
         assert len(new) == 10
         for i in range(5):
             assert "Tradução" in new[2*i+1].get_text()
+
+
+def test_large_310_page_book_keeps_every_illustration(tmp_path):
+    """310 illustrated source pages become 620 pages without image re-encoding."""
+    import fitz
+    from PIL import Image
+    import io
+    buf = io.BytesIO()
+    Image.new("RGB", (20, 20), "#945da3").save(buf, format="PNG")
+    doc = fitz.open()
+    for i in range(310):
+        page = doc.new_page(width=400, height=520)
+        page.insert_image(fitz.Rect(35, 110, 370, 450), stream=buf.getvalue())
+        page.insert_text((30, 45), f"Character design lesson {i + 1}")
+    src = tmp_path / "original-310.pdf"
+    doc.save(str(src))
+    doc.close()
+    final = tmp_path / "translated-310.pdf"
+    result = process_pdf(str(src), str(final), FakeTranslator(), ocr_policy="nunca")
+    assert result.pages_original == 310
+    assert result.pages_final == 620
+    assert result.image_verified
+    with fitz.open(str(src)) as original, fitz.open(str(final)) as translated:
+        original_images = image_fingerprints(original)
+        translated_images = image_fingerprints(translated)
+        assert all(original_images[i] == translated_images[i * 2] for i in range(310))
