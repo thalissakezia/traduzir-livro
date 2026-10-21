@@ -6,6 +6,13 @@ Interface gratuita em português com Gradio, PyMuPDF, Tesseract OCR, ReportLab e
 
 **Modo mais seguro:** mantém cada página original e insere em seguida outra página com sua tradução. **Modo substituição:** tenta trocar somente texto nativo sem mexer nos objetos de imagem; em páginas escaneadas retorna ao modo seguro.
 
+
+### Abrir diretamente no navegador (GitHub Codespaces)
+
+Acesse **https://codespaces.new/thalissakezia/traduzir-livro** e crie um Codespace a partir da branch `main`. O ambiente usa a configuração `.devcontainer/devcontainer.json` para instalar as dependências e iniciar o app automaticamente. Na aba **PORTS**, abra a porta **7860** (ela é detectada automaticamente); verá os campos de **upload** e **download** do PDF. Não precisa instalar Python no seu celular.
+
+**Atenção:** Codespaces tem cotas de uso e, dependendo da sua conta, pode exigir configuração de cobrança. Consulte as cotas antes de iniciar e pare o Codespace ao terminar, para evitar consumo desnecessário. O Codespace permanece ativo enquanto processa e não é um serviço web 24 horas. O arquivo enviado é processado no ambiente do Codespace e não é adicionado ao repositório.
+
 ### Rodar com Docker
 
 ```bash
