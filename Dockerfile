@@ -2,6 +2,7 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=7860
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl ca-certificates \
     tesseract-ocr tesseract-ocr-eng tesseract-ocr-spa tesseract-ocr-fra \
     tesseract-ocr-deu tesseract-ocr-ita fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
