@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr-deu tesseract-ocr-ita fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
+# Instalar PyTorch somente para CPU: evita bibliotecas CUDA enormes e desnecessárias.
+RUN pip install --no-cache-dir torch==2.7.1+cpu --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py engine.py ./
 RUN useradd -m -u 1000 appuser && chown -R appuser /app
