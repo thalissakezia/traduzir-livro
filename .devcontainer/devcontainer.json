@@ -7,7 +7,7 @@
   "workspaceFolder": "/workspaces/traduzir-livro",
   "remoteUser": "appuser",
   "overrideCommand": true,
-  "postStartCommand": "nohup python /app/app.py > /tmp/traduzir-livro.log 2>&1 &",
+  "postStartCommand": "nohup python -u /workspaces/traduzir-livro/app.py > /tmp/traduzir-livro.log 2>&1 &",
   "forwardPorts": [
     7860
   ],
