@@ -1,49 +1,70 @@
-# Traduzir Livro 📚
+# 📚 Traduzir Livro — PDFs ilustrados em português
 
-Upload de um PDF ilustrado → tradução para português brasileiro → download de PDF com ilustrações preservadas.
+Aplicação web em português para traduzir PDFs de livros ilustrados, preservando os desenhos e permitindo **enviar o livro em partes pequenas para evitar HTTP 413 (nginx)**.
 
-Interface gratuita em português com Gradio, PyMuPDF, Tesseract OCR, ReportLab e Argos Translate. IA local Ollama opcional.
+## Usar no navegador com GitHub Codespaces
 
-**Modo mais seguro:** mantém cada página original e insere em seguida outra página com sua tradução. **Modo substituição:** tenta trocar somente texto nativo sem mexer nos objetos de imagem; em páginas escaneadas retorna ao modo seguro.
+1. Acesse [Abrir Codespaces](https://codespaces.new/thalissakezia/traduzir-livro) na branch `main`.
+2. Após abrir o ambiente, abra a aba **Portas** e a porta **7860**. Se aparecer a confirmação de segurança do GitHub, verifique que o endereço pertence ao seu Codespace.
+3. A interface terá os botões **Selecionar PDF**, **Traduzir meu livro** e, quando concluir, **Baixar PDF traduzido**.
 
+**Se já houver um Codespace aberto com a versão antiga do Gradio, atualizar somente a página não altera o código dele.** No Terminal, se o Git estiver disponível, execute `git pull --ff-only` e reinicie o aplicativo (ou reconstrua o Codespace depois de atualizar). Se não houver Git no ambiente antigo, use um Codespace novo a partir da branch `main`; o novo contêiner já inclui Git.
 
-### Abrir diretamente no navegador (GitHub Codespaces)
+### Como evitamos o 413
 
-Acesse **https://codespaces.new/thalissakezia/traduzir-livro** e crie um Codespace a partir da branch `main`. O ambiente usa a configuração `.devcontainer/devcontainer.json` para instalar as dependências e iniciar o app automaticamente. Na aba **PORTS**, abra a porta **7860** (ela é detectada automaticamente); verá os campos de **upload** e **download** do PDF. Não precisa instalar Python no seu celular.
+O navegador lê o arquivo original e envia fatias de **256 KiB**, uma de cada vez. O backend junta os blocos exatamente como foram enviados, valida o PDF e só depois o traduz. Não comprimimos, redimensionamos nem convertimos as imagens no upload.
 
-**Atenção:** Codespaces tem cotas de uso e, dependendo da sua conta, pode exigir configuração de cobrança. Consulte as cotas antes de iniciar e pare o Codespace ao terminar, para evitar consumo desnecessário. O Codespace permanece ativo enquanto processa e não é um serviço web 24 horas. O arquivo enviado é processado no ambiente do Codespace e não é adicionado ao repositório.
+O limite configurado é **320 MB e 850 páginas**, sujeito ao espaço e aos recursos do ambiente. Um arquivo grande pode levar bastante tempo para traduzir, dependendo da CPU, do OCR e do serviço de tradução. O aplicativo usa uma fila para evitar trabalhos simultâneos em excesso.
 
-### Rodar com Docker
+### Preservação do livro
+
+- **Modo padrão — preservação máxima:** reproduz cada página original sem modificar suas ilustrações e insere depois uma página traduzida. Ideal para manuais ilustrados.
+- **Modo substituição:** para textos digitais, tenta substituir o texto na página; se não conseguir de modo seguro, usa uma página de tradução adicional.
+- O processo valida com **SHA-256** os fluxos de imagens raster, comparando original e resultado.
+- Tradução automática e OCR não garantem equivalência editorial perfeita. Desenhos vetoriais também exigem inspeção visual, principalmente em modo substituição.
+
+### Tecnologias
+
+| Componente | Implementação |
+|---|---|
+| Interface e upload fragmentado | HTML/JavaScript nativo + FastAPI |
+| Montagem de PDF sem rasterização | PyMuPDF |
+| OCR | Tesseract |
+| Tradução gratuita local | Argos Translate |
+| Tradução com IA local opcional | Ollama |
+| PDF das traduções e fontes | ReportLab |
+| Testes | pytest + GitHub Actions |
+
+### Docker (opção para hospedagem ou execução própria)
 
 ```bash
 docker build -t traduzir-livro .
 docker run --rm -p 7860:7860 traduzir-livro
 ```
 
-Abra http://localhost:7860
+Abra http://localhost:7860 no computador que executa o Docker.
 
-### Rodar com Python 3.11
+### Python 3.11 (execução alternativa)
 
-Instale Tesseract (idioma inglês) e fonte DejaVu Sans; depois execute:
+Instale Tesseract OCR e fontes DejaVu no sistema. Depois:
 
 ```bash
 pip install -r requirements.txt
 python app.py
 ```
 
-O Argos baixa o modelo de idiomas na primeira execução e pode funcionar offline depois disso. Para fluência superior, instale Ollama no mesmo servidor e baixe qwen2.5:7b.
-
-### Limitações
-
-Traduções automáticas e OCR precisam de revisão. Processamento de 300+ páginas exige recursos de CPU, RAM e tempo. A Vercel é ótima para a interface, mas inadequada para executar OCR e inferência de livros extensos diretamente em funções serverless. Deploy recomendado: Docker num servidor apropriado ou Hugging Face Space Docker com recursos suficientes. Arquivos PDF não devem ser colocados no GitHub.
-
-As imagens raster são comparadas por SHA-256 dos fluxos originais; o modo conservador não modifica gráficos vetoriais nem imagens. No modo substituição, fundos com textos complexos podem mudar visualmente.
-
-Implementação independente inspirada em ideias de [pdf-layout-translate](https://github.com/joanmarcriera/pdf-layout-translate) e [jctots/pdf-translate](https://github.com/jctots/pdf-translate), ambos MIT. Nenhum código AGPL foi incorporado. Respeite os direitos autorais dos livros; traduções não devem ser distribuídas sem autorização.
-
 ### Testes
 
 ```bash
-pip install pytest
+pip install pytest httpx
 python -m pytest -q
 ```
+
+### Privacidade e despesas
+
+- PDFs são guardados **temporariamente** no disco do servidor e disponibilizados apenas com identificadores e tokens de upload difíceis de adivinhar. Os dados de sessões expiradas são eliminados de forma oportunista após cerca de quatro horas, quando chegam novas solicitações. Isso não equivale a armazenamento permanente.
+- Não inclua dados confidenciais ao usar a porta pública de um Codespace. O link pode ser acessado por qualquer pessoa, e a instância não possui autenticação de usuários.
+- Códigos e bibliotecas podem ser gratuitos, mas Codespaces possui franquias e eventuais custos de computação; verifique seus limites.
+- Não distribua traduções de livros protegidos sem autorização de quem detém os direitos.
+
+O projeto é uma implementação própria. Inspirações: [PDFMathTranslate](https://github.com/PDFMathTranslate/PDFMathTranslate-next), [pdf-layout-translate](https://github.com/joanmarcriera/pdf-layout-translate), [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF). Não foram copiadas partes de código AGPL dos projetos referidos.
