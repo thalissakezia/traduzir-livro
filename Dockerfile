@@ -10,7 +10,8 @@ COPY requirements.txt .
 # Instalar PyTorch somente para CPU: evita bibliotecas CUDA enormes e desnecessárias.
 RUN pip install --no-cache-dir torch==2.7.1+cpu --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py engine.py ./
+COPY app.py engine.py webapp.py ./
+COPY web ./web
 RUN useradd -m -u 1000 appuser && chown -R appuser /app
 USER appuser
 EXPOSE 7860
