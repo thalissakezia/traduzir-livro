@@ -1,4 +1,4 @@
-"""Testes da interface Gradio, incluindo funcionamento da porta 7860."""
+"""Testes da interface de upload em partes e da porta 7860."""
 from __future__ import annotations
 import os
 import socket
@@ -8,8 +8,8 @@ import time
 import urllib.request
 
 def test_interface_imports():
-    from app import demo
-    assert demo is not None
+    from app import app
+    assert app is not None
 
 def test_http_server_starts():
     with socket.socket() as sock:
@@ -28,7 +28,7 @@ def test_http_server_starts():
         for _ in range(60):
             if proc.poll() is not None:
                 output = proc.stdout.read()
-                raise AssertionError(f"Servidor Gradio morreu durante o início: {output[-3000:]}")
+                raise AssertionError(f"Servidor FastAPI morreu durante o início: {output[-3000:]}")
             try:
                 with urllib.request.urlopen(
                     f"http://127.0.0.1:{port}/", timeout=2
