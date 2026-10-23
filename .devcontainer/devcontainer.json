@@ -7,14 +7,15 @@
   "workspaceFolder": "/workspaces/traduzir-livro",
   "remoteUser": "appuser",
   "overrideCommand": true,
-  "postStartCommand": "nohup python -u /workspaces/traduzir-livro/app.py > /tmp/traduzir-livro.log 2>&1 &",
+  "postStartCommand": "bash /workspaces/traduzir-livro/.devcontainer/start.sh",
   "forwardPorts": [
     7860
   ],
   "portsAttributes": {
     "7860": {
       "label": "Traduzir Livro • Abrir interface",
-      "onAutoForward": "openBrowser"
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
     }
   },
   "customizations": {
