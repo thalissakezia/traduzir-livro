@@ -8,7 +8,7 @@ Aplicação web em português para traduzir PDFs de livros ilustrados, preservan
 2. Após abrir o ambiente, abra a aba **Portas** e a porta **7860**. Se aparecer a confirmação de segurança do GitHub, verifique que o endereço pertence ao seu Codespace.
 3. A interface terá os botões **Selecionar PDF**, **Traduzir meu livro** e, quando concluir, **Baixar PDF traduzido**.
 
-**Se já houver um Codespace aberto com a versão antiga do Gradio, atualizar somente a página não altera o código dele.** No Terminal, se o Git estiver disponível, execute `git pull --ff-only` e reinicie o aplicativo (ou reconstrua o Codespace depois de atualizar). Se não houver Git no ambiente antigo, use um Codespace novo a partir da branch `main`; o novo contêiner já inclui Git.
+**Se já houver um Codespace aberto com a interface antiga, atualizar somente a página não altera o código dele.** No Terminal, execute:\n\n```bash\ncd /workspaces/traduzir-livro && git pull --ff-only && python .devcontainer/restart.py\n```\n\nO comando atualiza o código, encerra apenas o processo antigo do tradutor e inicia o novo servidor, conferindo a rota `/health`. Se o ambiente antigo não tiver Git, recrie o Codespace a partir da branch `main` (o novo contêiner já inclui Git).
 
 ### Como evitamos o 413
 
