@@ -14,8 +14,7 @@
   "portsAttributes": {
     "7860": {
       "label": "Traduzir Livro • Abrir interface",
-      "onAutoForward": "openBrowser",
-      "visibility": "public"
+      "onAutoForward": "openBrowser"
     }
   },
   "customizations": {
