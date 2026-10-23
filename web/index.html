@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light"/>
+  <title>Traduzir Livro — Ilustrações preservadas</title>
+  <style>
+    :root {font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17253c;background:#f4f6fc}
+    *{box-sizing:border-box}
+    body{margin:0;padding:30px 18px 60px}
+    .wrap{width:min(100%,900px);margin:auto}
+    .top{text-align:center;margin-bottom:30px}
+    .mark{display:inline-flex;align-items:center;justify-content:center;background:#e8eafd;border-radius:20px;width:60px;height:60px;font-size:30px}
+    h1{font-size:clamp(28px,5vw,43px);letter-spacing:-1.2px;margin:12px 0 8px}
+    .subtitle{color:#5e6982;font-size:16px;margin:0 auto;max-width:620px;line-height:1.5}
+    .shell{background:#fff;border:1px solid #e0e5f0;box-shadow:0 14px 50px #18264b0d;border-radius:24px;overflow:hidden}
+    .bar{background:#f9faff;border-bottom:1px solid #e8ecf4;padding:14px 25px;font-size:13px;color:#5b6780;display:flex;justify-content:space-between;gap:8px}
+    .pill{color:#3a4fc6;background:#e9edff;padding:4px 9px;border-radius:20px;font-weight:700}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;padding:26px}
+    .col{min-width:0}
+    label.head{font-size:14px;font-weight:750;display:block;margin-bottom:10px}
+    .drop{border:2px dashed #9ba8e9;background:#f8f9ff;border-radius:17px;min-height:185px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s}
+    .drop:hover,.drop.dragging{border-color:#4b53df;background:#f0f2ff}
+    .drop .emoji{font-size:37px}
+    .drop strong{color:#273d9c;margin:10px 0 4px}
+    .drop small{color:#6a7489;line-height:1.5}
+    #fileInput{display:none}
+    .picked{margin-top:10px;font-size:12px;overflow-wrap:anywhere;color:#344164}
+    select,input[type=text]{width:100%;border:1px solid #c9d1e1;border-radius:12px;background:#fff;font-size:14px;padding:12px;color:#1d3047}
+    fieldset{border:0;padding:0;margin:0}
+    .opt{display:block;padding:12px;border:1px solid #e0e5ef;border-radius:12px;margin:9px 0;cursor:pointer;font-size:14px}
+    .opt:has(input:checked){background:#f2f3ff;border-color:#8998e9}
+    .opt input{accent-color:#3949cd;margin-right:6px}
+    .opt small{display:block;margin-left:24px;margin-top:3px;color:#66728a;font-size:12px;line-height:1.4}
+    .field{margin-top:20px}
+    details{border-top:1px solid #e9edf5;padding:16px 0 0;margin:18px 0}
+    summary{font-weight:700;font-size:13px;cursor:pointer}
+    .primary{width:100%;border:0;border-radius:14px;background:#354bd5;color:#fff;font-weight:800;padding:17px;font-size:16px;cursor:pointer}
+    .primary:disabled{opacity:.55;cursor:not-allowed}
+    .progress{border-radius:12px;background:#e8eafb;height:11px;overflow:hidden;margin:13px 0 6px}
+    .progress>div{height:100%;width:0;background:linear-gradient(90deg,#6578ed,#344bcc);transition:width .25s}
+    #status{min-height:54px;font-size:14px;color:#47536c;line-height:1.55;white-space:pre-line}
+    #download{display:none;text-align:center;padding:15px;border-radius:13px;background:#e9f7ed;color:#165c31;text-decoration:none;font-weight:750;border:1px solid #aee3bd;margin-top:12px}
+    #download.show{display:block}
+    .notice{padding:18px 24px;background:#f8f9fd;border-top:1px solid #e7ebf3;color:#58657d;font-size:13px;line-height:1.65}
+    .notice b{color:#2d405c}
+    .result{background:#f5f7fc;padding:22px;border-radius:16px;margin-top:11px}
+    .result h3{margin:0 0 10px;font-size:17px}
+    .mini{font-size:13px;color:#687589;line-height:1.6}
+    .footer{text-align:center;font-size:12px;color:#7d879c;margin-top:19px}
+    @media(max-width:680px){body{padding:14px 10px 35px}.grid{grid-template-columns:1fr;padding:17px;gap:10px}.bar{padding:10px 17px}.drop{min-height:150px}.top{margin-bottom:18px}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="mark" aria-hidden="true">📚</div>
+    <h1>Traduzir Livro</h1>
+    <p class="subtitle">Transforme livros ilustrados em português brasileiro. Preservamos os desenhos e enviamos arquivos grandes em partes pequenas.</p>
+  </header>
+  <section class="shell">
+    <div class="bar"><span>Tradutor de PDF ilustrado</span><span class="pill">Upload em partes ✓</span></div>
+    <div class="grid">
+      <div class="col">
+        <label class="head" for="fileInput">1 · Escolha o livro original</label>
+        <div class="drop" id="drop" role="button" tabindex="0" aria-label="Escolher PDF">
+          <div class="emoji">📄</div>
+          <strong>Selecionar PDF</strong>
+          <small>Toque aqui ou arraste um arquivo PDF.<br/>Até 320 MB, 850 páginas.</small>
+          <div id="picked" class="picked"></div>
+        </div>
+        <input id="fileInput" type="file" accept=".pdf,application/pdf"/>
+        <div class="field">
+          <label class="head" for="source">2 · Idioma original</label>
+          <select id="source">
+            <option>Inglês</option><option>Espanhol</option><option>Francês</option>
+            <option>Alemão</option><option>Italiano</option>
+          </select>
+        </div>
+        <div class="field">
+          <span class="head">3 · Como preservar o livro?</span>
+          <fieldset>
+            <label class="opt"><input type="radio" name="layout" value="conservador" checked>
+              <b>Preservação máxima</b>
+              <small>Mantém a página original intacta e acrescenta a tradução na página seguinte. Melhor para livros com muitas ilustrações.</small>
+            </label>
+            <label class="opt"><input type="radio" name="layout" value="substituir">
+              <b>Português no lugar do inglês</b>
+              <small>Substitui o texto digital quando possível; nas páginas de risco, adiciona uma página traduzida.</small>
+            </label>
+          </fieldset>
+        </div>
+        <details>
+          <summary>Opções avançadas</summary>
+          <div class="field">
+            <label class="head" for="ocr">Texto em páginas escaneadas (OCR)</label>
+            <select id="ocr">
+              <option value="automatico">Automático</option>
+              <option value="sempre">Sempre</option>
+              <option value="nunca">Desativado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="head" for="backend">Motor de tradução</label>
+            <select id="backend">
+              <option value="argos">Gratuito (Argos Translate)</option>
+              <option value="ollama">IA local (Ollama instalado no servidor)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="head" for="model">Modelo Ollama (se selecionado)</label>
+            <input id="model" type="text" value="qwen2.5:7b"/>
+          </div>
+        </details>
+      </div>
+      <div class="col">
+        <label class="head">4 · Enviar, traduzir e baixar</label>
+        <div class="result">
+          <h3>Seu PDF em português</h3>
+          <p class="mini">O arquivo será dividido em blocos de 256 KiB. Isso evita o envio inteiro que estava causando o erro HTTP 413.</p>
+          <button class="primary" id="start" type="button">Traduzir meu livro</button>
+          <div class="progress" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="fill"></div></div>
+          <div id="status" role="status" aria-live="polite">Selecione um PDF para começar.</div>
+          <a id="download" href="#">⬇ Baixar PDF traduzido</a>
+        </div>
+        <p class="mini">O upload é retomado automaticamente em caso de falha temporária na rede. Depois que a tradução começar, você poderá acompanhar o progresso aqui.</p>
+      </div>
+    </div>
+    <div class="notice"><b>Ilustrações protegidas.</b> O modo conservador mantém as páginas originais. Os objetos de imagem são verificados por SHA-256 no PDF final. Traduções automáticas podem exigir revisão, especialmente em legendas e textos pequenos. Não distribua livros protegidos por direitos autorais sem autorização.</div>
+  </section>
+  <div class="footer">Processamento no servidor · Upload por blocos · Nenhuma API paga obrigatória</div>
+</main>
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const picker = $("fileInput"), drop = $("drop"), status = $("status"), start = $("start");
+  const bar = $("progress"), fill = $("fill"), picked = $("picked"), download = $("download");
+  let active = false, selected = null, session = null;
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const fmt = (n) => (n / (1024*1024)).toFixed(1).replace(".", ",") + " MB";
+  function update(message, percent) {
+    status.textContent = message;
+    if (percent !== undefined) {
+      const value = Math.min(100, Math.max(0, Number(percent) || 0));
+      fill.style.width = value + "%"; bar.setAttribute("aria-valuenow", String(Math.round(value)));
+    }
+  }
+  function pick(file) {
+    if (!file) return;
+    selected = file;
+    picked.textContent = file.name + " · " + fmt(file.size);
+    if (!file.name.toLowerCase().endsWith(".pdf")) update("Selecione um PDF válido.",0);
+    else update("Arquivo selecionado. Pronto para enviar.",0);
+  }
+  drop.addEventListener("click", () => { if (!active) picker.click(); });
+  drop.addEventListener("keydown", e => {
+    if (!active && (e.key === "Enter" || e.key === " ")) {e.preventDefault();picker.click();}
+  });
+  picker.addEventListener("change", () => pick(picker.files[0]));
+  drop.addEventListener("dragover", e => {e.preventDefault();drop.classList.add("dragging");});
+  drop.addEventListener("dragleave", () => drop.classList.remove("dragging"));
+  drop.addEventListener("drop", e => {
+    e.preventDefault();drop.classList.remove("dragging");
+    if (!active) pick(e.dataTransfer.files[0]);
+  });
+  async function api(path, options={}) {
+    const response = await fetch(path, {cache:"no-store",...options});
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.detail || "HTTP "+response.status);
+    return body;
+  }
+  function headers(json=false) {
+    const h = {"X-Upload-Token":session.token};
+    if (json) h["Content-Type"] = "application/json";
+    return h;
+  }
+  async function upload(file) {
+    session = await api("/api/uploads", {
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({filename:file.name,size:file.size})
+    });
+    const {chunk_size, chunks, upload_id} = session;
+    for (let i=0;i<chunks;i++) {
+      const part = file.slice(i*chunk_size,Math.min(file.size,(i+1)*chunk_size));
+      let done=false;
+      for (let attempt=0;attempt<4;attempt++) {
+        try {
+          await api("/api/uploads/"+upload_id+"/chunks/"+i,{
+            method:"POST",headers:headers(),body:part
+          });
+          done=true;break;
+        } catch(err) {
+          if (attempt===3) throw new Error(
+            "Não foi possível enviar o bloco "+(i+1)+"/"+chunks+". "+err.message);
+          await sleep(650*(attempt+1));
+        }
+      }
+      if (!done) throw new Error("Upload interrompido.");
+      const pct=Math.round((i+1)/chunks*100);
+      update("Enviando PDF em partes: "+pct+"% ("+fmt(Math.min(file.size,(i+1)*chunk_size))+" de "+fmt(file.size)+").",pct);
+    }
+    const finished=await api("/api/uploads/"+upload_id+"/complete",{
+      method:"POST",headers:headers()
+    });
+    update(finished.message,0);
+  }
+  async function translate() {
+    const payload={
+      source:$("source").value,
+      layout:document.querySelector("input[name=layout]:checked").value,
+      ocr:$("ocr").value,
+      backend:$("backend").value,
+      model:$("model").value
+    };
+    await api("/api/uploads/"+session.upload_id+"/translate",{
+      method:"POST",headers:headers(true),body:JSON.stringify(payload)
+    });
+    for (;;) {
+      const job=await api("/api/uploads/"+session.upload_id+"/status",{headers:headers()});
+      update(job.message+(job.error ? "\n"+job.error : ""),job.progress);
+      if (job.phase==="concluido") {
+        download.href="/api/uploads/"+session.upload_id+"/download?token="+encodeURIComponent(session.token);
+        download.classList.add("show");
+        update(job.message+"\nSeu livro está pronto para baixar.",100);
+        return;
+      }
+      if (job.phase==="erro") throw new Error(job.error || job.message);
+      await sleep(2200);
+    }
+  }
+  start.addEventListener("click",async () => {
+    if (active) return;
+    if (!selected || !selected.name.toLowerCase().endsWith(".pdf")) {
+      update("Primeiro selecione um arquivo PDF.");return;
+    }
+    if (selected.size===0 || selected.size>320*1024*1024) {
+      update("O PDF precisa ter até 320 MB.");return;
+    }
+    active=true;start.disabled=true;start.textContent="Processando...";
+    download.classList.remove("show");download.removeAttribute("href");
+    try {
+      await upload(selected);
+      await translate();
+    } catch(err) {
+      update("Não foi possível concluir: "+err.message);
+    } finally {
+      start.disabled=false;start.textContent="Traduzir outro livro";active=false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
