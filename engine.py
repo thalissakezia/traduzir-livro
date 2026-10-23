@@ -12,7 +12,7 @@ import fitz
 
 SOURCE_LANGUAGES = {"Inglês": "en", "Espanhol": "es", "Francês": "fr", "Alemão": "de", "Italiano": "it"}
 MAX_PAGES = 850
-MAX_FILE_BYTES = 160 * 1024 * 1024
+MAX_FILE_BYTES = 320 * 1024 * 1024
 
 
 @dataclass
@@ -304,7 +304,7 @@ def process_pdf(
 ) -> Result:
     path = Path(input_path)
     if not path.is_file() or path.stat().st_size > MAX_FILE_BYTES:
-        raise ValueError("Envie um PDF com até 160 MB.")
+        raise ValueError("Envie um PDF com até 320 MB.")
     with fitz.open(input_path) as source:
         if source.needs_pass:
             raise ValueError("PDF protegido por senha. Desbloqueie-o primeiro.")
